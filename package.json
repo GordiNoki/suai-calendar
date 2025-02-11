@@ -1,0 +1,15 @@
+{
+    "name": "suai-calendar",
+    "description": "Облачная функция для конвертации расписания занятий в iСal файл",
+    "scripts": {
+        "build": "tsc",
+        "pack": "del pack.zip && 7z a -tzip pack.zip dist package.json package-lock.json"
+    },
+    "dependencies": {
+        "ical-generator": "^8.0.1",
+        "moment": "^2.30.1"
+    },
+    "devDependencies": {
+        "typescript": "^5.6.3"
+    }
+}
