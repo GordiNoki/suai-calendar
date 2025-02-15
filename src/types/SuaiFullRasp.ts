@@ -9,7 +9,7 @@ export interface SuaiFullRasp {
 }
 
 interface Day {
-    day: number;
+    day?: number;
     title: string;
     lessons: Lesson[];
 }

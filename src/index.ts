@@ -57,8 +57,8 @@ export async function handler(event: any, _ctx: any) {
         .add(1, "year")
         .endOf("month");
 
-    // Slice first index, since index 0 is bruh
-    for (const day of rasp.days.slice(1)) {
+    for (const day of rasp.days.filter((day) => !!day.day)) {
+        if (!day.day) continue;
         for (const lesson of day.lessons) {
             const dayTime = startDay
                 .clone()
