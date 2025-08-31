@@ -3,15 +3,6 @@ import moment from "moment";
 import { SuaiGroup } from "./types/SuaiGroup";
 import { SuaiFullRasp } from "./types/SuaiFullRasp";
 
-const timeMap: Record<number, { h: number; m: number }> = {
-    1: { h: 9, m: 30 },
-    2: { h: 11, m: 10 },
-    3: { h: 13, m: 0 },
-    4: { h: 15, m: 0 },
-    5: { h: 16, m: 40 },
-    6: { h: 18, m: 30 },
-};
-
 export async function handler(event: any, _ctx: any) {
     const inputGroup = event.queryStringParameters.group;
     if (!inputGroup) return { statusCode: 400, body: "Group is not provided" };
@@ -20,7 +11,7 @@ export async function handler(event: any, _ctx: any) {
     calendar.timezone("Europe/Moscow");
 
     const groups: SuaiGroup[] = await fetch(
-        "https://api.guap.ru/rasp/v1/get-groups"
+        "https://api.guap.ru/rasp-sem/v1/get-groups"
     ).then((r) => r.json());
     const groupId = groups.find((group) => group.title === inputGroup)?.aisId;
 
@@ -29,7 +20,7 @@ export async function handler(event: any, _ctx: any) {
     }
 
     const rasp: SuaiFullRasp = await fetch(
-        "https://api.guap.ru/rasp/v1/get-rasp-full?groupAisId=" + groupId
+        "https://api.guap.ru/rasp-sem/v1/get-rasp-full?groupAisId=" + groupId
     ).then((r) => r.json());
 
     if (!rasp || rasp.regGroups.selected?.inner !== inputGroup) {
@@ -63,7 +54,7 @@ export async function handler(event: any, _ctx: any) {
             const dayTime = startDay
                 .clone()
                 .day(day.day)
-                .add(timeMap[lesson.less]);
+                .add(lesson.begin);
 
             if (startWeekDay > day.day) {
                 dayTime.add(1, "week");
