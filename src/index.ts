@@ -2,6 +2,7 @@ import ical, { ICalEventRepeatingFreq } from "ical-generator";
 import moment from "moment";
 import { SuaiGroup } from "./types/SuaiGroup";
 import { SuaiFullRasp } from "./types/SuaiFullRasp";
+import fs from "fs";
 
 export async function handler(event: any, _ctx: any) {
     const inputGroup = event.queryStringParameters.group;
@@ -11,7 +12,7 @@ export async function handler(event: any, _ctx: any) {
     calendar.timezone("Europe/Moscow");
 
     const groups: SuaiGroup[] = await fetch(
-        "https://api.guap.ru/rasp-sem/v1/get-groups"
+        "https://api.guap.ru/rasp-sem/v1/get-groups",
     ).then((r) => r.json());
     const groupId = groups.find((group) => group.title === inputGroup)?.aisId;
 
@@ -20,12 +21,12 @@ export async function handler(event: any, _ctx: any) {
     }
 
     const rasp: SuaiFullRasp = await fetch(
-        "https://api.guap.ru/rasp-sem/v1/get-rasp-full?groupAisId=" + groupId
+        "https://api.guap.ru/rasp-sem/v1/get-rasp-full?groupAisId=" + groupId,
     ).then((r) => r.json());
 
     if (!rasp || rasp.regGroups.selected?.inner !== inputGroup) {
         console.log(
-            JSON.stringify({ msg: "Bad schedule API response", data: rasp })
+            JSON.stringify({ msg: "Bad schedule API response", data: rasp }),
         );
         return { statusCode: 404, body: "Buh" };
     }
@@ -51,14 +52,7 @@ export async function handler(event: any, _ctx: any) {
     for (const day of rasp.days.filter((day) => !!day.day)) {
         if (!day.day) continue;
         for (const lesson of day.lessons) {
-            const dayTime = startDay
-                .clone()
-                .day(day.day)
-                .add(lesson.begin);
-
-            if (startWeekDay > day.day) {
-                dayTime.add(1, "week");
-            }
+            const dayTime = startDay.clone().day(day.day).add(lesson.begin);
 
             for (const weekLesson of [
                 ...(lesson.week1 ?? []),
@@ -66,6 +60,13 @@ export async function handler(event: any, _ctx: any) {
                 ...(lesson.weekAll ?? []),
             ]) {
                 const lessonTime = dayTime.clone();
+                if (startWeekDay > day.day) {
+                    lessonTime.add(
+                        weekLesson.week ? (2 - weekLesson.week) * 2 : 1,
+                        "week",
+                    );
+                }
+
                 if (weekLesson.week && weekLesson.week == 2) {
                     lessonTime.add(1, "week");
                 }
