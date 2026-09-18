@@ -3,7 +3,7 @@
     "description": "Облачная функция для конвертации расписания занятий в iСal файл",
     "scripts": {
         "build": "tsc",
-        "pack": "del pack.zip && 7z a -tzip pack.zip dist package.json package-lock.json"
+        "pack": "node -e \"require('node:fs').rmSync('pack.zip',{force:true})\" && 7z a -tzip pack.zip dist package.json package-lock.json"
     },
     "dependencies": {
         "ical-generator": "^8.0.1",
